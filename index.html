@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Почитатели</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://fonts.googleapis.com/css?family=Saira+Semi+Condensed" rel="stylesheet">
+        <script type="text/javascript" src="./js/jquery311.min.js"></script>
+        <script type="text/javascript" src="./js/steem.min.js"></script>
+        <script type="text/javascript" src="./js/cookie.min.js"></script>
+        <script type="text/javascript" src="./js/isotope.min.js"></script>
+        <script type="text/javascript" src="./js/main.min.js"></script>
+        <link rel="stylesheet" href="./css/styles.min.css">
+    </head>  
+    <body>
+        <div class="header">
+            <img src="./img/logo.png"/>           
+            <input type="text" id="user" value=""/>             
+        </div>
+      
+        <div class="container-fluid info-header">
+            <div class="row">
+                <div class="main-account-box col-lg-7">
+                    <div class="img-circle" id="main-avatar"></div>
+                    <div id="level"></div>
+                    <div id="profile_caption"></div>
+                    <div class="account-data">
+                        <div>
+                            <div>
+                                <label>Репутация</label>
+                                <div id="reputation"></div>
+                            </div>
+                            <div>
+                                <label>Доступная СГ</label>
+                                <div id="voting_power"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div>
+                                <label>Сила Голоса</label>
+                                <div id="power"></div>
+                            </div>
+                            <div>
+                                <label>Mgests</label>
+                                <div id="gests"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="profit-line-box col-lg-5">
+                    <h3>Приблизительный рост СГ</h3>
+                    <ul class="markers">
+                          <li>
+                            <div class="title">
+                                  Час                     
+                            </div>
+                            <div class="value">
+                              <div class="profit" id="hour-profit"></div>
+                            </div>
+                          </li>
+                          <li>
+                            <div class="title">
+                                  День                       
+                            </div>
+                            <div class="value">
+                              <div class="profit" id="day-profit"></div>
+                            </div>
+                          </li>
+                          <li>
+                            <div class="title">
+                                  Неделя 
+                            </div>
+                            <div class="value">
+                              <div class="profit" id="week-profit"></div>
+                            </div>
+                          </li>
+                          <li>
+                            <div class="title">
+                                Месяц 
+                            </div>                            
+                            <div class="value">
+                              <div class="profit" id="month-profit"></div>
+                            </div>                           
+                          </li>
+                          <li>
+                            <div class="title">
+                                Год 
+                            </div>
+                            <div class="value last">                               
+                                <div class="profit" id="year-profit"></div>                             
+                            </div>
+                          </li>
+                    </ul>      
+                </div>
+            </div>
+        </div>
+        <div style="clear: both"></div>       
+        <div class="voter-column">
+            <div class="grid"></div>
+        </div>            
+        <div class="dev-label">
+            Dev: <span>elviento</span>
+        </div>
+    </body>
+</html>
+
+<!--div class="grid-item">
+   <div class="grid-item-header">
+       <div class="grid-item-header-text">
+           elviento
+       </div>
+   </div>
+   <div class="grid-item-body">
+       <div class="grid-item-vote-cnt">
+           <span class="upvotes-cnt">10</span>
+           <span>/</span>
+           <span>10</span>
+       </div>
+       <div class="grid-item-footer">
+           <div>
+               <div> Средняя СГ </div>
+               <div class="average-sp"> 95% </div>
+           </div>
+           <div>
+               <div> Всего GBG </div>
+               <div class="total-reward"> 100 </div>
+           </div>
+           <div>
+               <div class="total-upvotes-weight"> Общий вес </div>
+               <div> 77% </div>
+           </div>
+       </div>
+   </div>
+   <div class="img-circle wrap-ava" style="background: url(img/ava2.png) no-repeat #ffffff; "></div>
+   <div class="img-circle wrap-ava-2" ></div>
+</div-->
