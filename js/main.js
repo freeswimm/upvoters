@@ -7,20 +7,19 @@ var userVoters = [];
 var totalReward = 0;
 var account, movementGlobal, powerGlobal,  accountGests;
 
-// --------Настройки-------------
+// --------Settings-------------
 
-var pingInterval = 6000; // пинг в секундах
-var COOKIE_EXPIRES = 360;  // время действия всех кук в днях
-var postCount = 5; // кол-во последних постов
-var holder_reward = 15; // % награды держателям голоса
-var inflation_rate = 15; // Годовая инфляция:
+var pingInterval = 6000; 
+var COOKIE_EXPIRES = 360; 
+var postCount = 5; 
+var holder_reward = 15; 
+var inflation_rate = 15; 
 
-var WS = 'wss://ws.golos.io';
-var DOMAIN = 'https://golos.io/';
+var DOMAIN = 'https://steemit.com/';
 var debug = true;
 // ------------------------------
 
-//---- Цветовые схемы плиток ----
+//---- Color themes ----
 
 var color_theme = {
     black : { min : -100, max : -0.1  },
@@ -32,13 +31,10 @@ var color_theme = {
 }
 
 
-// установить текушую дату
 var now = new Date(); // 2000-12-31T00:00:00'
 var curDate = now.getFullYear()+'-'+now.getMonth()+'-'+now.getDate()+'T'+now.getHours()+':'+now.getMinutes()+':'+now.getSeconds();  
 
 var account = $('#user').val();
-
-steem.api.setWebSocket(WS);
 
 
 $('#user').on('change',function(){  
@@ -47,7 +43,7 @@ $('#user').on('change',function(){
         loadingShow(true);
         init();  
     } else {
-        alert('Введите имя пользователя.');
+        alert('Input user name.');
     }
 });
 
@@ -55,7 +51,6 @@ if((Cookies.get('user') !== 'null') && (Cookies.get('user') !== undefined)){
     $('#user').val(Cookies.get('user'));       
 }
 
-// переход на профайл куратора
 $('.grid').on('click', '.grid-item', function(){
     window.open($(this).data('link'), '_blank');  
 });
@@ -75,7 +70,7 @@ function init(){
          mainStream();
     }else{
         $('.voter-column, .info-header').hide();
-        alert('Введите имя пользователя');
+        alert('Input user name.');
     }   
 }
  
@@ -101,12 +96,11 @@ function mainStream(){
             } else {
                $('.voter-column, .info-header').hide();
                $('.overlay, .pre-loader').remove();
-               alert('Пользователь не найден');
+               alert('User not found.');
             }            
         });
     });    
-    
-    // создать объекты с кураторами и внести их в таблицу gui 
+      
     Promise.all([getUserPosts()])
     .then(getCurators)
     .then(renderTable)
@@ -114,7 +108,6 @@ function mainStream(){
     .catch(function(error) { $('#errors').html(error); }); 
 }
 
-// вернуть последние postCount постов юзера
 function getUserPosts(){
     return new Promise(function(resolve, reject) {
         steem.api.getDiscussionsByAuthorBeforeDate(account, '', curDate, postCount, function(err, results) {      
@@ -128,7 +121,6 @@ function getUserPosts(){
     });    
 }
 
-// создать объекты с кураторами
 function getCurators(){
     userVoters = [];
     totalReward = 0;
@@ -136,31 +128,30 @@ function getCurators(){
         if(userPosts !== null && (userPosts[0] !== undefined)){
             posts = userPosts;    
             if(posts.length > 0){          
-                // считаем общую награду за все посты      
+               
                 posts.forEach(function(post){                   
                     totalReward +=  getPostPayout(post);                 
                 });
 
-                // создает объект с данными для каждого куратора
+            
                 posts.forEach(function(post){
                                 
                     if(post.active_votes !== undefined){                        
                         
                         if(post.active_votes.length > 0){     
                             
-                            var post_rshares = getPostShares(post);
-                            var post_payout_value = getPostPayout(post);
-                                                       
-                            // выбрать кураторов из каждого поста
+                            var post_rshares = getPostRshares(post);
+                            var post_payout_value = getPostPayout(post);                                           
+                        
                             post.active_votes.forEach(function(item){
-                                // 
+                               
                                 if(userVoters[item.voter] === undefined){
                                     userVoters[item.voter] = {
                                         name:item.voter,
                                         rshares:item.rshares,
                                         upvote_power_perc:item.percent/100,
                                         cnt:1,
-                                        upvote_reward:getReward(post_payout_value, post_rshares, item.rshares) //post_payout, post_rshares, upvote_rshare
+                                        upvote_reward:getReward(post_payout_value, post_rshares, item.rshares) 
                                     };
                                 } else {
                                     userVoters[item.voter] = {
@@ -170,25 +161,24 @@ function getCurators(){
                                         cnt : ++userVoters[item.voter].cnt,  
                                         upvote_reward : userVoters[item.voter].upvote_reward*1 + getReward(post_payout_value, post_rshares, item.rshares)
                                     };
-                                }                    
+                                }                                   
                             });
                         }
                     }
                 });
-
-                // добавить аватары и линки на профайл кураторов                   
+                
                 steem.api.getAccounts(Object.keys(userVoters), function(err, voters_data){
                     if(err === null){ 
                         if(voters_data.length > 0){
                             voters_data.forEach(function(profile){
                                 if(profile.name in userVoters){
                                     userVoters[profile.name].avatar = getAvatar(profile);
-                                    userVoters[profile.name].link = DOMAIN+'@'+profile.name;
+                                    userVoters[profile.name].link = DOMAIN+'@'+profile.name;                                  
                                     userVoters[profile.name].curation_rate = (((userVoters[profile.name].upvote_reward*1)/totalReward)*100).toFixed(1); // общий рейтинг куратора по кол-ву вознаграждения
                                 }                            
                             });
                         }
-                        //_d(voters_data);
+                        
                     }else{
                         $('#errors').html(err);   
                         reject(new Error(err));
@@ -197,13 +187,12 @@ function getCurators(){
                 });
                
             } else {
-                reject(new Error("У вас нет постов"));
+                reject(new Error("You haven't any post"));
             }
         }
     });
 }
 
-// определяет цвет плитки по рейттингу
 function getColorByRate(rate){    
     for(color in color_theme){
         if((color_theme[color].min <= rate*1) && (color_theme[color].max >= rate*1)){
@@ -212,7 +201,6 @@ function getColorByRate(rate){
     }
 }
 
-// создать таблицу с кураторами
 function renderTable(){
     return new Promise(function(resolve, reject) {
        
@@ -223,9 +211,10 @@ function renderTable(){
                 if(userVoters.hasOwnProperty(prop)) {
                     var color_class = getColorByRate(userVoters[prop].curation_rate)+'-palette';
                     var reward = (userVoters[prop].upvote_reward).toFixed(2);                        
-                    var avatar = (userVoters[prop].avatar == false) ? 'img/blanc.png' : 'https://imgp.golos.io/120x120/'+userVoters[prop].avatar;
+                    var avatar = (userVoters[prop].avatar == false) ? 'img/blanc.png' : 'https://steemitimages.com/120x120/'+userVoters[prop].avatar;
                     var sp_average = (1*userVoters[prop].upvote_power_perc).toFixed(0);
-                    rows += '<div class="grid-item '+color_class+'" data-link="'+userVoters[prop].link+'" data-reward="'+reward+'"><div class="grid-item-header"><div class="grid-item-header-text">'+userVoters[prop].name+'</div></div>  <div class="grid-item-body"><div class="grid-item-vote-cnt"><span class="upvotes-cnt">'+userVoters[prop].cnt+'</span><span>/</span><span>'+postCount+'</span></div><div class="grid-item-footer"><div><div> Средняя СГ </div><div class="average-sp"> '+sp_average+'% </div></div><div><div> Всего GBG </div><div class="total-reward">'+reward+'</div></div><div><div class="total-upvotes-weight"> Общий вес </div><div> '+userVoters[prop].curation_rate+'% </div></div></div></div> <div class="img-circle wrap-ava" style="background: url('+avatar+') no-repeat #ffffff; "></div><div class="img-circle wrap-ava-2" ></div></div>';
+                   
+                    rows += '<div class="grid-item '+color_class+'" data-link="'+userVoters[prop].link+'" data-reward="'+reward+'"><div class="grid-item-header"><div class="grid-item-header-text">'+userVoters[prop].name+'</div></div>  <div class="grid-item-body"><div class="grid-item-vote-cnt"><span class="upvotes-cnt">'+userVoters[prop].cnt+'</span><span>/</span><span>'+postCount+'</span></div><div class="grid-item-footer"><div><div> Average SP </div><div class="average-sp"> '+sp_average+'% </div></div><div><div> Total SBD </div><div class="total-reward">'+reward+'</div></div><div><div class="total-upvotes-weight"> Avg weight </div><div> '+userVoters[prop].curation_rate+'% </div></div></div></div> <div class="img-circle wrap-ava" style="background: url('+avatar+') no-repeat #ffffff; "></div><div class="img-circle wrap-ava-2" ></div></div>';
                 }
             }
             
@@ -267,33 +256,30 @@ function getAvatar(acc) {
     }
     return false;
 }
-    
-// получить награду upvote
-function getReward(post_payout, post_rshares, upvote_rshare){    
-    return (((upvote_rshare/post_rshares)*post_payout).toFixed(3))*1;
-}
 
-// return abs_rshares поста, либо
-// суммирует rshares всех апвоутов для поста, если post.mode == 'second_payout'
-function getPostShares(post){
-    if(post.mode == 'first_payout'){
+function getPostRshares(post){
+    
+    if(post.abs_rshares > 0){
         return post.abs_rshares;
     } else {
-        // если пост находится во втором окне выплат (30дн)
         var sum_curators_rshares = 0;
         post.active_votes.forEach(function(item){
             sum_curators_rshares += item.rshares*1;
         });
-        return post.abs_rshares*1 + sum_curators_rshares;
-    }
+        return sum_curators_rshares;
+    }   
 }
 
-// награда за пост
-function getPostPayout(post){
-    var payout = (post.mode == 'first_payout') ? post.total_pending_payout_value : post.total_payout_value;
-    // парсит строку с общей выплатой за пост
-    var split_payout = (payout).split(' '); 
-    return split_payout[0]*1;
+function getReward(post_payout, post_rshares, upvote_rshare){    
+    return (((upvote_rshare/post_rshares)*post_payout).toFixed(3))*1;
+}
+
+function getPostPayout(post){   
+    var split_pending_payout = (post.pending_payout_value).split(' ');
+    var split_total_payout = (post.total_payout_value).split(' ');
+    var payout =  (split_pending_payout[0]*1 > 0) ? split_pending_payout[0]*1 : split_total_payout[0]*1;   
+   
+    return payout;
 }
 
 function getGlobalData(callback){
@@ -318,20 +304,17 @@ function getAccountData(callback){
     });
 }
 
-// показать хедер с инфой пользователя
 function showInfo(){
     if(userData.length > 0){
-               
-        // получаем gests
+                      
         accountGests = userData[0].vesting_shares.split(' ')[0];
         $('#gests').html((accountGests/1000000).toFixed(3));
         $('#voting_power').html((userData[0].voting_power/100).toFixed(2)+'%');
-        
-        // получаем картинку
+              
         var metadata = JSON.parse(userData[0].json_metadata);
         if(metadata.profile !== undefined){
             if(metadata.profile.profile_image !== undefined){
-                $('#main-avatar').attr('style', 'background: url(https://imgp.golos.io/120x120/'+metadata.profile.profile_image+') no-repeat;'); 
+                $('#main-avatar').attr('style', 'background: url(https://steemitimages.com/120x120/'+metadata.profile.profile_image+') no-repeat;'); 
             }else{
                 $('#main-avatar').attr('style', 'background: url(img/blanc.png)  no-repeat;');
             }
@@ -340,50 +323,40 @@ function showInfo(){
         }       
      
         $('#reputation').html(getReputation(userData[0].reputation));
-        
-        // показать общую силу голоса для аккаунта
+             
         if(golosData !== null){
             movementGlobal = golosData.total_vesting_shares.split(' ')[0];
             powerGlobal = golosData.total_vesting_fund_steem.split(' ')[0];
             $('#power').html((powerGlobal * (accountGests / movementGlobal)).toFixed(3));
         }   
-        // показать общую силу голоса для аккаунта
+      
         $('#power').html(getPower());
-        
-        // уровень аккаунта
-        $('#level').html('<img src="https://imgp.golos.io/75x60/http://golosboard.com/@'+account+'/level.png"/>');       
+                      
         //_d(steem.formatter.vestToSteem(userData[0].reputation));
         showRewardsGrid();       
     }
 }
 
-// показать таблицу с прогнозом наград
 function showRewardsGrid(){
     if(golosData !== null){
-        
-        // текущая капитализация голоса
+             
         var current_supply = golosData.current_supply.split(' ')[0];
-                
-        // вычисляем прирост токенов с учетом инфляции за год
+                        
         var total_year_delta = current_supply*inflation_rate/100;
-        
-        // % доля отложенных голосов пользователя в системе
+                
         var account_power_share = getPower()/current_supply;
-        
-        // годовая награда всем держателям силы голоса
+               
         var golos_holder_year_rewards = total_year_delta*holder_reward/100;
-
-        // вносим данные в таблицу (по дням, часам итп)
+       
         $('.profit-line-box #year-profit').text((golos_holder_year_rewards*account_power_share).toFixed(3));
-        $('.profit-line-box #month-profit').text((golos_holder_year_rewards*account_power_share/12).toFixed(3));
+        $('.profit-line-box #month-profit').text((golos_holder_year_rewards*account_power_share*30/365).toFixed(3));
         $('.profit-line-box #week-profit').text((golos_holder_year_rewards*account_power_share/52).toFixed(3));
-        $('.profit-line-box #day-profit').text((golos_holder_year_rewards*account_power_share/356).toFixed(3));
-        $('.profit-line-box #hour-profit').text((golos_holder_year_rewards*account_power_share/(356*24)).toFixed(3));
+        $('.profit-line-box #day-profit').text((golos_holder_year_rewards*account_power_share/365).toFixed(3));
+        $('.profit-line-box #hour-profit').text((golos_holder_year_rewards*account_power_share/(365*24)).toFixed(3));
         //_d(golos_holder_year_rewards*account_power_share, golos_holder_year_rewards, total_year_delta);
     } 
 }
 
-// расчитать силу голоса для аккаунта
 function getPower(){
     
     if(golosData !== null){
@@ -395,15 +368,14 @@ function getPower(){
     }    
 }
 
-// получить точную (.00) репутацию аккаунта
 function getReputation(crude_rep){
     crude_rep = crude_rep+'';    
     if(isNaN(crude_rep)){ crude_rep = 0;}
     var is_negative = crude_rep.charAt(0) === '-';
-    // убрать первый символ, если репутация негативная 
+  
     crude_rep = is_negative ? crude_rep.substr(1): crude_rep;
     var out = Math.log10(crude_rep);
-    out = Math.max(out - 9, 0); // вычитаем 9, либо 0 если отрицательная
+    out = Math.max(out - 9, 0);
     out = (is_negative ? -1 : 1)*out;
     out = (out * 9) + 25; 
     
@@ -411,7 +383,7 @@ function getReputation(crude_rep){
 }
 
 $('.dev-label').on('click', function(){
-    window.open('https://golos.io/@elviento', '_blank');
+    window.open('https://steemit.com/@elviento', '_blank');
 });
 
 function _d(param){
