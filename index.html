@@ -9,37 +9,48 @@
         <script type="text/javascript" src="./js/steem.min.js"></script>
         <script type="text/javascript" src="./js/cookie.min.js"></script>
         <script type="text/javascript" src="./js/isotope.min.js"></script>
+        <script type="text/javascript" src="./js/tooltipster.min.js"></script>
+        <script type="text/javascript" src="./js/tooltipster.bundle.min.js"></script>
         <script type="text/javascript" src="./js/main.min.js"></script>
         <link rel="stylesheet" href="./css/styles.min.css">
+        <link rel="stylesheet" href="./css/tooltipster.min.css">
+        <link rel="stylesheet" href="./css/tooltipster.bundle.min.css">
     </head>  
     <body>
         <div class="header">
-            <img src="./img/logo.png"/>           
-            <input type="text" id="user" value=""/>             
+            <img src="./img/logo.png"/>    
+            <div class="header-controls-box">
+                <label class="title">User</label>
+                <input type="text" id="user" class="input tooltip" title="Input account for calculate statistic" value=""/>  
+                <label class="title">Post quantity</label>
+                <input type="number" id="post_count" class="input tooltip" title='Number of last posts statistics will be calculated for'/>
+            
+                <input type="button" class="simple-button settings-submit" value="Apply"/>
+            </div>
         </div>
       
         <div class="container-fluid info-header">
             <div class="row">
                 <div class="main-account-box col-lg-7">
-                    <div class="img-circle" id="main-avatar"></div>                   
+                    <div class="img-circle" id="main-avatar"></div>      
                     <div id="profile_caption"></div>
                     <div class="account-data">
                         <div>
-                            <div>
+                            <div class='tooltip' title='Exact reputation'>
                                 <label>Reputation</label>
                                 <div id="reputation"></div>
                             </div>
-                            <div>
-                                <label>Available SP</label>
+                            <div class='tooltip' title='Available % Steem Power.'>
+                                <label>Voting power</label>
                                 <div id="voting_power"></div>
                             </div>
                         </div>
                         <div>
-                            <div>
+                            <div class='tooltip' title='Quantity of Steem tokens in Steem Power.'>
                                 <label>Steem power</label>
                                 <div id="power"></div>
                             </div>
-                            <div>
+                            <div class='tooltip' title='Internal Steemit units corresponding to your Steem Power.'>
                                 <label>Mgests</label>
                                 <div id="gests"></div>
                             </div>
@@ -48,7 +59,7 @@
                 </div>
                 <div class="profit-line-box col-lg-5">
                     <h3>Average SP growth for holders</h3>
-                    <ul class="markers">
+                    <ul class="markers tooltip" title='Steem Power holders are receiving 15% of annual Steem tokens inflation, depends of Steem Power amount in account.'>
                           <li>
                             <div class="title">
                                   Hour                     
@@ -90,6 +101,26 @@
                             </div>
                           </li>
                     </ul>      
+                </div>
+                <div class="filter-line col-lg-12">
+                    <form id="filter_form">
+                        
+                        <label class="title">Sort by:</label>
+                        <span>
+                            <input type="radio" name="sort_by" class="radio" id="radio-1" value="reward" checked/>
+                            <label for="radio-1">Total weight</label>
+                        </span>
+                        <span>
+                            <input type="radio" name="sort_by" class="radio" id="radio-2" value="upvotes_cnt"/>
+                            <label for="radio-2">Upvote quantity</label>
+                        </span>
+                        <span>
+                            <input type="radio" name="sort_by" class="radio" id="radio-3" value="average_sp"/>
+                            <label for="radio-3">Average SP</label>
+                        </span>
+                        
+                        <!--input type="button" class="simple-button filter-submit" value="Применить"/-->
+                    </form>
                 </div>
             </div>
         </div>

@@ -57,19 +57,39 @@ table {
 .header .logo{
     padding-left: 15px;
 }
-.header #user{
+.header #user{   
+    width: 150px;     
+}
+.header .input{
     background-color: rgba(255,255,255,.25);
     height: 25px;
     border: 1px solid white;
     font-size: 15px;
     padding: 5px;
-    width: 150px;
-    margin-left: 15px;
+    margin-left: 5px;
+    margin-right: 15px;
+    color: white;  
+}
+.header #post_count{
+    width: 55px;
+}
+.header .settings-submit{
+    display: none;
+}
+.header label{
     color: white;
+    font-size: 14px;
+    margin: 10px 0;
 }
 .info-header{
     margin-top: 50px;
     display: none;
+}
+.header .header-controls-box{
+    display: inline-block;
+    float: right;
+    padding-top: 5px;
+    padding-right: 10px;
 }
 .well{
     background: rgba(0, 0, 0, 0.02);
@@ -176,6 +196,112 @@ table {
     margin-bottom: 10px;
 }*/
 
+/* filter line */
+.filter-line{
+    font-size: 14px;
+    background-color: rgba(0,0,0,0.02);
+    margin: 10px 0;
+    border-top-left-radius: 10px;
+    padding: 10px;
+}
+
+
+.ml-25{
+    margin-left: 25px;
+}
+
+.filter-line span{
+    padding: 9px 5px;
+    background-color: rgba(0,0,0,.02);
+}
+.filter-line .title{
+    font-size: 14px;
+    color: #999;
+    font-weight: bold;
+    text-shadow: 1px 2px 0 #fff;
+}
+.filter-line span > label{
+    color: #999;
+    font-size: 14px;
+}
+
+/* radio-button */
+.radio {
+  vertical-align: top;
+  width: 17px;
+  height: 17px;
+  margin: 0 3px 0 0;
+}
+.radio + label {
+  cursor: pointer;
+}
+.radio:not(checked) {
+  position: absolute;
+  opacity: 0;
+}
+.radio:not(checked) + label {
+  position: relative;
+  padding: 0 0 0 26px;
+}
+.radio:not(checked) + label:before {
+  content: '';
+  position: absolute;
+  top: 0px;
+  left: 1px;
+  width: 22px;
+  height: 22px;
+  border: 1px solid #CDD1DA;
+  border-radius: 50%;
+  background: #FFF;
+}
+.radio:not(checked) + label:after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #9ACD32;
+  box-shadow: inset 0 1px 1px rgba(0,0,0,.5);
+  opacity: 0;
+  transition: all .2s;
+}
+.radio:checked + label:after {
+  opacity: 1;
+}
+.radio:focus + label:before {
+  box-shadow: 0 0 0 3px rgba(210,200,255,.2);
+}
+
+.simple-button {
+  cursor: pointer;
+  display: inline-block;
+  font-family: arial,sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+  color: #999;;
+  text-decoration: none;
+  padding: .5em 1.2em;
+  outline: none;
+  border: 1px solid rgba(0,0,0,.1);
+  border-radius: 2px;
+  background: rgb(245,245,245) linear-gradient(#f4f4f4, #f1f1f1);
+  transition: all .218s ease 0s;
+}
+.simple-button:hover {
+  color: rgb(24,24,24);
+  border: 1px solid rgb(198,198,198);
+  background: #f7f7f7 linear-gradient(#f7f7f7, #f1f1f1);
+  box-shadow: 0 1px 2px rgba(0,0,0,.1);
+}
+.simple-button:active {
+  color: rgb(51,51,51);
+  border: 1px solid rgb(204,204,204);
+  background: rgb(238,238,238) linear-gradient(rgb(238,238,238), rgb(224,224,224));
+  box-shadow: 0 1px 2px rgba(0,0,0,.1) inset;
+}
+
 /* profitline */
 .profit-line-box .markers{
   list-style-type: none;
@@ -233,7 +359,8 @@ table {
     float: right;
     margin: 11px;   
     color: #999;
-    font-size: 12px;    
+    font-size: 12px;  
+    display: none;
 }   
 
 .dev-label span{
@@ -278,6 +405,10 @@ table {
     border-right: 1px solid #333;
     border-left: 1px solid #333;
 }
+.black-palette .voter-reputation{
+    color: #000;
+    background-color: #333;
+}
 
 .grey-palette .grid-item-header{
     background-color: #8B7B8B;
@@ -298,7 +429,10 @@ table {
     border-right: 1px solid #AB9AAB;
     border-left: 1px solid #AB9AAB;
 }
-
+.grey-palette .voter-reputation{
+    color: #8B7B8B;
+    background-color: #AB9AAB;
+}
 
 .fog-palette .grid-item-header{
     background-color: #9999FF;
@@ -318,6 +452,10 @@ table {
 .fog-palette .grid-item-footer > div:nth-child(2){
     border-right: 1px solid #CCCCFF;
     border-left: 1px solid #CCCCFF;
+}
+.fog-palette .voter-reputation{
+    color: #9999FF;
+    background-color: #CCCCFF;
 }
 
 .sea-palette .grid-item-header{
@@ -339,6 +477,10 @@ table {
     border-right: 1px solid #00CED1;
     border-left: 1px solid #00CED1;
 }
+.sea-palette .voter-reputation{
+    color: #20B2AA;
+    background-color: #00CED1;
+}
 
 .green-palette .grid-item-header{
     background-color: #9ACD32;
@@ -359,6 +501,10 @@ table {
     border-right: 1px solid #BADF59;
     border-left: 1px solid #BADF59;
 }
+.green-palette .voter-reputation{
+    color: #9ACD32;
+    background-color: #BADF59;
+}
 
 .orange-palette .grid-item-header{
     background-color: #FF8C00;
@@ -378,6 +524,10 @@ table {
 .orange-palette .grid-item-footer > div:nth-child(2){
     border-right: 1px solid #FFB500;
     border-left: 1px solid #FFB500;
+}
+.orange-palette .voter-reputation{
+    color: #FF8C00;
+    background-color: #FFB500;
 }
 
 .voter-column{
@@ -473,6 +623,21 @@ table {
      right: 11px;
      top: 44px; 
  }
+ 
+ .grid-item .voter-reputation{    
+    margin-right: 82px;   
+    display: block;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 35px;
+    float: right;    
+    padding-top: 6px;
+    line-height: 100%;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+ }
+
  
 @media (min-width: 250px) {
   .grid-item { 

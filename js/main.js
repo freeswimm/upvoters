@@ -1,11 +1,12 @@
 $(function () {
 
 var userData = null;
-var golosData = null; 
+var steemData = null; 
 var userPosts = null;
 var userVoters = [];
 var totalReward = 0;
 var account, movementGlobal, powerGlobal,  accountGests;
+var $grid = null;
 
 // --------Settings-------------
 
@@ -36,6 +37,26 @@ var curDate = now.getFullYear()+'-'+now.getMonth()+'-'+now.getDate()+'T'+now.get
 
 var account = $('#user').val();
 
+$('.tooltip').tooltipster();
+
+$('.settings-submit').on('click',function(){  
+    if ($('#user').val() !== '') { 
+        Cookies.set('user', $('#user').val(), {expires: COOKIE_EXPIRES});  
+        Cookies.set('post_count', $('#post_count').val(), {expires: COOKIE_EXPIRES});  
+        loadingShow(true);
+        init();  
+        $('.settings-submit').hide();
+    } else {
+        alert('Input user name.');
+    }
+});
+
+$('#user, #post_count').on('focus', function(){    
+    $('.settings-submit').show();
+});
+$('.settings-submit').on('click', function(){
+    $(this).hide();
+});
 
 $('#user').on('change',function(){  
     if ($('#user').val() !== '') { 
@@ -47,10 +68,21 @@ $('#user').on('change',function(){
     }
 });
 
+// sort
+$('#filter_form .radio').on('click', function(){ 
+    if($grid !== null){
+        $grid.isotope({ sortBy: [$(this).val(), 'reward'] });
+    }      
+});
+
 if((Cookies.get('user') !== 'null') && (Cookies.get('user') !== undefined)){
     $('#user').val(Cookies.get('user'));       
 }
-
+if((Cookies.get('post_count') !== 'null') && (Cookies.get('post_count') !== undefined)){
+    $('#post_count').val(Cookies.get('post_count'));       
+} else {
+    $('#post_count').val(postCount);
+}
 $('.grid').on('click', '.grid-item', function(){
     window.open($(this).data('link'), '_blank');  
 });
@@ -78,14 +110,17 @@ function loadingShow(type){
     if(type === true){       
         $('.voter-column, .info-header').hide();
         $('body').before('<div class="overlay"></div><div class="pre-loader"></div>');
+        $('.dev-label').hide(); 
     } else {
-       $('.overlay, .pre-loader').remove();
+        $('.dev-label').show(); 
+        $('.overlay, .pre-loader').remove();
+        $('.tooltip').tooltipster();
     }    
 }
 
 function mainStream(){
     getGlobalData(function(gls_data){
-        golosData = gls_data;
+        steemData = gls_data;
         //_d(gls_data);
         getAccountData(function(acc_data){ 
             if(acc_data.length > 0){                
@@ -103,7 +138,7 @@ function mainStream(){
       
     Promise.all([getUserPosts()])
     .then(getCurators)
-    .then(renderTable)
+   .then(function(){renderTable();})
     .then(function(){  loadingShow(false); })
     .catch(function(error) { $('#errors').html(error); }); 
 }
@@ -173,6 +208,7 @@ function getCurators(){
                             voters_data.forEach(function(profile){
                                 if(profile.name in userVoters){
                                     userVoters[profile.name].avatar = getAvatar(profile);
+                                    userVoters[profile.name].reputation = getReputation(profile.reputation);
                                     userVoters[profile.name].link = DOMAIN+'@'+profile.name;                                  
                                     userVoters[profile.name].curation_rate = (((userVoters[profile.name].upvote_reward*1)/totalReward)*100).toFixed(1); // общий рейтинг куратора по кол-ву вознаграждения
                                 }                            
@@ -210,11 +246,13 @@ function renderTable(){
             for( var prop in userVoters) { 
                 if(userVoters.hasOwnProperty(prop)) {
                     var color_class = getColorByRate(userVoters[prop].curation_rate)+'-palette';
-                    var reward = (userVoters[prop].upvote_reward).toFixed(2);                        
+                    var reward = (userVoters[prop].upvote_reward).toFixed(2);  
+                    var reputation = (1*userVoters[prop].reputation).toFixed(0);
                     var avatar = (userVoters[prop].avatar == false) ? 'img/blanc.png' : 'https://steemitimages.com/120x120/'+userVoters[prop].avatar;
                     var sp_average = (1*userVoters[prop].upvote_power_perc).toFixed(0);
-                   
-                    rows += '<div class="grid-item '+color_class+'" data-link="'+userVoters[prop].link+'" data-reward="'+reward+'"><div class="grid-item-header"><div class="grid-item-header-text">'+userVoters[prop].name+'</div></div>  <div class="grid-item-body"><div class="grid-item-vote-cnt"><span class="upvotes-cnt">'+userVoters[prop].cnt+'</span><span>/</span><span>'+postCount+'</span></div><div class="grid-item-footer"><div><div> Average SP </div><div class="average-sp"> '+sp_average+'% </div></div><div><div> Total SBD </div><div class="total-reward">'+reward+'</div></div><div><div class="total-upvotes-weight"> Avg weight </div><div> '+userVoters[prop].curation_rate+'% </div></div></div></div> <div class="img-circle wrap-ava" style="background: url('+avatar+') no-repeat #ffffff; "></div><div class="img-circle wrap-ava-2" ></div></div>';
+                    rows += '<div class="grid-item '+color_class+'" data-link="'+userVoters[prop].link+'" data-average_sp="'+sp_average+'" data-upvotes_cnt="'+userVoters[prop].cnt+'" data-reward="'+reward+'"><div class="grid-item-header"><div class="grid-item-header-text">'+userVoters[prop].name+'</div><div class="voter-reputation tooltip" title="Reputation of curator">'+reputation+'</div></div>  <div class="grid-item-body"><div class="grid-item-vote-cnt"><span class="upvotes-cnt tooltip" title="Quantity of posts uvoted by curator">'+userVoters[prop].cnt+'</span><span> of </span><span class="tooltip" title="Quantity of last created/updated posts">'+postCount+'</span></div><div class="grid-item-footer"><div class="tooltip" title="Average % of upvote for this curator"><div> Average Steem Power </div><div class="average-sp"> '+sp_average+'% </div></div><div class="tooltip" title="SBD amount by this curator by last '+userVoters[prop].cnt+' posts"><div> Total SBD </div><div class="total-reward">'+reward+'</div></div><div class="tooltip" title="Curator\'s share in rewards distribution by last'+userVoters[prop].cnt+' posts"><div class="total-upvotes-weight"> Total weight </div><div> '+userVoters[prop].curation_rate+'% </div></div></div></div> <div class="img-circle wrap-ava" style="background: url('+avatar+') no-repeat #ffffff; "></div><div class="img-circle wrap-ava-2" ></div></div>';
+
+                    //rows += '<div class="grid-item '+color_class+'" data-link="'+userVoters[prop].link+'" data-reward="'+reward+'"><div class="grid-item-header"><div class="grid-item-header-text">'+userVoters[prop].name+'</div></div>  <div class="grid-item-body"><div class="grid-item-vote-cnt"><span class="upvotes-cnt">'+userVoters[prop].cnt+'</span><span>/</span><span>'+postCount+'</span></div><div class="grid-item-footer"><div><div> Average SP </div><div class="average-sp"> '+sp_average+'% </div></div><div><div> Total SBD </div><div class="total-reward">'+reward+'</div></div><div><div class="total-upvotes-weight"> Avg weight </div><div> '+userVoters[prop].curation_rate+'% </div></div></div></div> <div class="img-circle wrap-ava" style="background: url('+avatar+') no-repeat #ffffff; "></div><div class="img-circle wrap-ava-2" ></div></div>';
                 }
             }
             
@@ -224,15 +262,17 @@ function renderTable(){
                 $('.grid').isotope('reloadItems');
             }
             $('.voter-column, .info-header').show();
-            $('.grid').isotope({              
+            $grid = $('.grid').isotope({              
               itemSelector: '.grid-item',
               percentPosition: true,
               layoutMode: 'fitRows',
               getSortData: {               
                 reward:"[data-reward] parseFloat",
+                 average_sp:"[data-average_sp] parseFloat",
+                upvotes_cnt:"[data-upvotes_cnt] parseFloat",
               },
               sortBy: 'reward',
-              sortAscending: { reward: false }
+              sortAscending: { reward: false, upvotes_cnt: false, average_sp: false }
             });                
            
         }
@@ -324,9 +364,9 @@ function showInfo(){
      
         $('#reputation').html(getReputation(userData[0].reputation));
              
-        if(golosData !== null){
-            movementGlobal = golosData.total_vesting_shares.split(' ')[0];
-            powerGlobal = golosData.total_vesting_fund_steem.split(' ')[0];
+        if(steemData !== null){
+            movementGlobal = steemData.total_vesting_shares.split(' ')[0];
+            powerGlobal = steemData.total_vesting_fund_steem.split(' ')[0];
             $('#power').html((powerGlobal * (accountGests / movementGlobal)).toFixed(3));
         }   
       
@@ -338,9 +378,9 @@ function showInfo(){
 }
 
 function showRewardsGrid(){
-    if(golosData !== null){
+    if(steemData !== null){
              
-        var current_supply = golosData.current_supply.split(' ')[0];
+        var current_supply = steemData.current_supply.split(' ')[0];
                         
         var total_year_delta = current_supply*inflation_rate/100;
                 
@@ -359,9 +399,9 @@ function showRewardsGrid(){
 
 function getPower(){
     
-    if(golosData !== null){
-        movementGlobal = golosData.total_vesting_shares.split(' ')[0];
-        powerGlobal = golosData.total_vesting_fund_steem.split(' ')[0];
+    if(steemData !== null){
+        movementGlobal = steemData.total_vesting_shares.split(' ')[0];
+        powerGlobal = steemData.total_vesting_fund_steem.split(' ')[0];
         return (powerGlobal * (accountGests / movementGlobal)).toFixed(3);        
     }else{
         return 0;
